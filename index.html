@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>DanceKeeper — competition reminders</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DanceKeeper">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#4A2650">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBF6EF;
+    --ink:#33203A;
+    --plum:#6E3B75;
+    --plum-light:#EFE1F1;
+    --plum-dark:#4A2650;
+    --gold:#E0A72E;
+    --gold-light:#FBF0DA;
+    --coral:#E1512E;
+    --coral-light:#FBE3DC;
+    --stone:#8B8391;
+    --stone-light:#E9E2E8;
+    --card:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .wrap{max-width:480px;margin:0 auto;padding:22px 18px 60px;}
+  .header{
+    background:var(--plum-dark);
+    color:var(--gold-light);
+    border-radius:20px;
+    padding:20px 22px;
+    margin-bottom:18px;
+  }
+  .header .brand{font-family:'Fraunces',serif;font-size:22px;font-weight:600;}
+  .header .brand span{color:var(--gold);}
+  .header .sub{font-size:12.5px;color:#D9C4DD;margin-top:3px;}
+
+  .tabs{display:flex;gap:6px;margin-bottom:18px;background:var(--stone-light);border-radius:12px;padding:4px;}
+  .tab{
+    flex:1;text-align:center;padding:9px 6px;border-radius:9px;
+    font-size:13px;font-weight:500;color:var(--stone);
+  }
+  .tab.active{background:var(--card);color:var(--plum-dark);}
+
+  .card{background:var(--card);border-radius:16px;padding:18px;border:1px solid #EFE7DA;margin-bottom:16px;}
+  h2.section{font-family:'Fraunces',serif;font-weight:500;font-size:17px;margin:0 0 12px 2px;}
+
+  label{display:block;font-size:12px;color:var(--stone);margin:12px 0 5px;font-weight:500;}
+  label:first-child{margin-top:0;}
+  input[type=text], input[type=date], input[type=time], input[type=number], select, textarea{
+    width:100%;border:1.5px solid var(--stone-light);border-radius:10px;
+    padding:11px 12px;font-size:15px;font-family:'Inter',sans-serif;background:#FCFBF8;color:var(--ink);
+  }
+  textarea{resize:vertical;min-height:70px;}
+  input:focus, select:focus, textarea:focus{outline:none;border-color:var(--plum);}
+  .row2{display:flex;gap:12px;}
+  .row2 > div{flex:1;}
+  button{font-family:'Inter',sans-serif;}
+  button.primary{
+    width:100%;margin-top:16px;background:var(--plum);color:#fff;border:none;
+    border-radius:10px;padding:13px;font-size:15px;font-weight:500;
+  }
+  button.secondary{
+    width:100%;margin-top:10px;background:var(--plum-light);color:var(--plum-dark);border:none;
+    border-radius:10px;padding:11px;font-size:14px;font-weight:500;
+  }
+  button.primary:active, button.secondary:active{opacity:.85;}
+
+  .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .cal-nav button{background:var(--plum-light);color:var(--plum-dark);border:none;border-radius:8px;width:32px;height:32px;font-size:16px;}
+  .cal-month{font-family:'Fraunces',serif;font-size:16px;font-weight:500;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .cal-dow{font-size:10.5px;color:var(--stone);text-align:center;font-weight:600;padding-bottom:4px;}
+  .cal-day{
+    aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-size:13px;position:relative;color:var(--ink);background:#FCFBF8;
+  }
+  .cal-day.empty{background:none;}
+  .cal-day.today{border:1.5px solid var(--plum);}
+  .cal-day .dot{width:5px;height:5px;border-radius:50%;background:var(--coral);margin-top:2px;}
+  .cal-day.reg .dot{background:var(--gold);}
+  .cal-day.comp .dot{background:var(--plum);}
+
+  .evt-list{margin-top:14px;}
+  .evt-row{
+    background:#FCFBF8;border:1px solid #EFE7DA;border-radius:12px;padding:12px 14px;
+    display:flex;align-items:center;gap:12px;margin-bottom:8px;
+  }
+  .evt-badge{
+    width:8px;height:32px;border-radius:4px;flex-shrink:0;background:var(--coral);
+  }
+  .evt-badge.reg{background:var(--gold);}
+  .evt-badge.comp{background:var(--plum);}
+  .evt-info{flex:1;min-width:0;}
+  .evt-name{font-size:14.5px;font-weight:500;}
+  .evt-meta{font-size:12px;color:var(--stone);margin-top:1px;}
+  .evt-date{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--plum);text-align:right;}
+  .del-btn{width:24px;height:24px;border-radius:50%;border:none;background:var(--stone-light);color:var(--stone);font-size:13px;line-height:1;margin-left:6px;}
+  .empty-note{font-size:13px;color:var(--stone);padding:10px 4px;}
+
+  .import-box{background:var(--plum-light);border-radius:12px;padding:14px;margin-bottom:14px;}
+  .import-box .hint{font-size:12.5px;color:var(--plum-dark);margin-bottom:8px;line-height:1.5;}
+  .found-dates{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+  .date-chip{
+    background:#fff;border:1.5px solid var(--plum);color:var(--plum-dark);
+    border-radius:20px;padding:6px 12px;font-size:12.5px;font-family:'JetBrains Mono',monospace;
+  }
+
+  .sound-status{
+    display:flex;align-items:center;gap:10px;background:var(--gold-light);border-radius:10px;padding:12px 14px;margin-bottom:10px;
+  }
+  .sound-status .txt{flex:1;font-size:13px;color:var(--plum-dark);}
+
+  #alarmOverlay{
+    position:fixed;inset:0;background:rgba(51,32,58,0.93);display:none;
+    align-items:center;justify-content:center;z-index:999;padding:24px;
+  }
+  #alarmOverlay.show{display:flex;}
+  .alarm-card{background:#fff;border-radius:22px;padding:32px 26px;max-width:340px;width:100%;text-align:center;}
+  .alarm-icon{
+    width:60px;height:60px;border-radius:50%;background:var(--coral-light);color:var(--coral);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:26px;
+    animation:pulse 1s infinite;
+  }
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+  .alarm-title{font-family:'Fraunces',serif;font-size:20px;font-weight:600;margin-bottom:4px;}
+  .alarm-sub{font-size:14px;color:var(--stone);margin-bottom:22px;}
+  .alarm-btns{display:flex;flex-direction:column;gap:10px;}
+  .alarm-btns button{padding:13px;border-radius:10px;border:none;font-size:15px;font-weight:500;}
+  .btn-done{background:var(--plum);color:#fff;}
+  .btn-snooze{background:var(--plum-light);color:var(--plum-dark);}
+  .btn-dismiss{background:none;color:var(--stone);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="brand">Dance<span>Keeper</span></div>
+    <div class="sub" id="todayLine"></div>
+  </div>
+
+  <div class="import-box" style="margin-bottom:14px;">
+    <div class="hint">Add this page to your Home Screen (Safari's Share menu) for one-tap access, full screen, no browser bar. Your reminders save automatically on this device.</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="calendar" onclick="switchTab('calendar')">Calendar</div>
+    <div class="tab" data-tab="add" onclick="switchTab('add')">Add event</div>
+    <div class="tab" data-tab="settings" onclick="switchTab('settings')">Ring sound</div>
+  </div>
+
+  <div id="tab-calendar">
+    <div class="card">
+      <div class="cal-nav">
+        <button onclick="changeMonth(-1)">&#8249;</button>
+        <div class="cal-month" id="calMonthLabel"></div>
+        <button onclick="changeMonth(1)">&#8250;</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+
+    <h2 class="section">Upcoming</h2>
+    <div class="evt-list" id="upcomingList"></div>
+  </div>
+
+  <div id="tab-add" style="display:none;">
+    <div class="import-box">
+      <div class="hint">Paste text copied from a competition page or email — DanceKeeper will spot any dates in it so you can fill the form faster.</div>
+      <textarea id="importText" placeholder="Paste competition details here..."></textarea>
+      <button class="secondary" onclick="scanForDates()">Find dates in this text</button>
+      <div class="found-dates" id="foundDates"></div>
+    </div>
+
+    <div class="card">
+      <label>Event name</label>
+      <input type="text" id="inName" placeholder="e.g. Naomi — Regional Champs entry">
+      <label>What is this reminder for?</label>
+      <select id="inType">
+        <option value="registration">Registration deadline</option>
+        <option value="competition">Competition day</option>
+        <option value="custom">Something else</option>
+      </select>
+      <div class="row2">
+        <div>
+          <label>Date</label>
+          <input type="date" id="inDate">
+        </div>
+        <div>
+          <label>Remind at (time)</label>
+          <input type="time" id="inTime" value="09:00">
+        </div>
+      </div>
+      <label>Remind me how far ahead?</label>
+      <select id="inLead">
+        <option value="0">On the day itself</option>
+        <option value="1">1 day before</option>
+        <option value="3">3 days before</option>
+        <option value="7" selected>1 week before</option>
+        <option value="14">2 weeks before</option>
+        <option value="21">3 weeks before</option>
+      </select>
+      <label>Notes (optional)</label>
+      <textarea id="inNotes" placeholder="Entry link, fee, costume needed, etc."></textarea>
+      <button class="primary" onclick="addEvent()">Save reminder</button>
+    </div>
+  </div>
+
+  <div id="tab-settings" style="display:none;">
+    <div class="card">
+      <h2 class="section">Your alarm sound</h2>
+      <div class="sound-status" id="soundStatus">
+        <div class="txt">Using the default alarm tone</div>
+      </div>
+      <label>Upload your own sound</label>
+      <input type="file" id="soundFile" accept="audio/*" onchange="handleSoundUpload(event)">
+      <div style="font-size:12px;color:var(--stone);margin-top:8px;line-height:1.5;">
+        Record a short clip in Voice Memos (or pick any song), then upload it here — 5&ndash;15 seconds works best. It'll play on loop when a reminder fires.
+      </div>
+      <button class="secondary" onclick="testSound()">Test this sound</button>
+      <button class="secondary" onclick="resetSound()">Reset to default tone</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="alarmOverlay">
+  <div class="alarm-card">
+    <div class="alarm-icon">&#127925;</div>
+    <div class="alarm-title" id="alarmName">Event name</div>
+    <div class="alarm-sub" id="alarmSub">Details</div>
+    <div class="alarm-btns">
+      <button class="btn-done" onclick="markHandled()">Done, I've registered</button>
+      <button class="btn-snooze" onclick="snoozeAlarm()">Snooze 1 hour</button>
+      <button class="btn-dismiss" onclick="dismissAlarm()">Dismiss</button>
+    </div>
+  </div>
+</div>
+
+<audio id="customAudio" loop></audio>
+
+<script>
+let events = [];
+let audioCtx = null;
+let alarmInterval = null;
+let activeAlarmId = null;
+let calViewDate = new Date();
+let customSoundData = null;
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem('dancekeeper_events');
+    events = raw ? JSON.parse(raw) : [];
+  }catch(e){ events = []; }
+  try{
+    customSoundData = localStorage.getItem('dancekeeper_sound');
+  }catch(e){ customSoundData = null; }
+}
+function saveEvents(){
+  try{ localStorage.setItem('dancekeeper_events', JSON.stringify(events)); }catch(e){}
+}
+
+function switchTab(name){
+  ['calendar','add','settings'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = (t===name) ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab').forEach(el => {
+    el.classList.toggle('active', el.dataset.tab === name);
+  });
+  if(name === 'calendar') renderCalendar();
+  if(name === 'settings') renderSoundStatus();
+}
+
+function pad(n){ return String(n).padStart(2,'0'); }
+function todayISO(){
+  const d = new Date();
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+
+function scanForDates(){
+  const text = document.getElementById('importText').value;
+  const found = [];
+  const monthNames = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+
+  const re1 = /\b(\d{1,2})(?:st|nd|rd|th)?\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})\b/gi;
+  let m;
+  while((m = re1.exec(text)) !== null){
+    const day = parseInt(m[1],10);
+    const month = monthNames.indexOf(m[2].toLowerCase());
+    const year = parseInt(m[3],10);
+    found.push(new Date(year, month, day));
+  }
+  const re2 = /\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})\b/gi;
+  while((m = re2.exec(text)) !== null){
+    const month = monthNames.indexOf(m[1].toLowerCase());
+    const day = parseInt(m[2],10);
+    const year = parseInt(m[3],10);
+    found.push(new Date(year, month, day));
+  }
+  const re3 = /\b(\d{4})-(\d{2})-(\d{2})\b/g;
+  while((m = re3.exec(text)) !== null){
+    found.push(new Date(parseInt(m[1],10), parseInt(m[2],10)-1, parseInt(m[3],10)));
+  }
+  const re4 = /\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/g;
+  while((m = re4.exec(text)) !== null){
+    found.push(new Date(parseInt(m[3],10), parseInt(m[2],10)-1, parseInt(m[1],10)));
+  }
+
+  const seen = new Set();
+  const unique = found.filter(d => {
+    if(isNaN(d.getTime())) return false;
+    const key = d.toISOString().slice(0,10);
+    if(seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).sort((a,b) => a-b);
+
+  const container = document.getElementById('foundDates');
+  if(unique.length === 0){
+    container.innerHTML = '<div class="empty-note">No dates spotted — enter the date manually below.</div>';
+    return;
+  }
+  container.innerHTML = unique.map(d => {
+    const iso = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+    const label = d.toLocaleDateString(undefined, { day:'numeric', month:'short', year:'numeric' });
+    return `<div class="date-chip" onclick="useDate('${iso}')">${label}</div>`;
+  }).join('');
+}
+
+function useDate(iso){
+  document.getElementById('inDate').value = iso;
+  window.scrollTo({ top: document.getElementById('inName').offsetTop - 20, behavior:'smooth' });
+}
+
+function addEvent(){
+  const name = document.getElementById('inName').value.trim();
+  const type = document.getElementById('inType').value;
+  const date = document.getElementById('inDate').value;
+  const time = document.getElementById('inTime').value || '09:00';
+  const lead = parseInt(document.getElementById('inLead').value, 10);
+  const notes = document.getElementById('inNotes').value.trim();
+
+  if(!name || !date){
+    alert('Please enter an event name and a date.');
+    return;
+  }
+
+  const eventDate = new Date(date+'T00:00:00');
+  const reminderDate = new Date(eventDate);
+  reminderDate.setDate(reminderDate.getDate() - lead);
+  const reminderISO = reminderDate.getFullYear()+'-'+pad(reminderDate.getMonth()+1)+'-'+pad(reminderDate.getDate());
+
+  events.push({
+    id: Date.now().toString(36),
+    name, type, eventDate: date, eventTime: time,
+    reminderDate: reminderISO, reminderTime: time,
+    notes, lastFiredKey: null, snoozeUntil: null
+  });
+  saveEvents();
+
+  document.getElementById('inName').value = '';
+  document.getElementById('inDate').value = '';
+  document.getElementById('inNotes').value = '';
+  document.getElementById('importText').value = '';
+  document.getElementById('foundDates').innerHTML = '';
+  switchTab('calendar');
+}
+
+function deleteEvent(id){
+  events = events.filter(e => e.id !== id);
+  saveEvents();
+  renderCalendar();
+}
+
+function changeMonth(delta){
+  calViewDate.setMonth(calViewDate.getMonth() + delta);
+  renderCalendar();
+}
+
+function renderCalendar(){
+  const year = calViewDate.getFullYear();
+  const month = calViewDate.getMonth();
+  document.getElementById('calMonthLabel').textContent =
+    calViewDate.toLocaleDateString(undefined, { month:'long', year:'numeric' });
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const dows = ['S','M','T','W','T','F','S'];
+
+  let html = dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
+  for(let i=0;i<firstDay;i++) html += '<div class="cal-day empty"></div>';
+
+  for(let day=1; day<=daysInMonth; day++){
+    const iso = year+'-'+pad(month+1)+'-'+pad(day);
+    const dayEvents = events.filter(e => e.eventDate === iso || e.reminderDate === iso);
+    const isToday = iso === todayISO();
+    let cls = 'cal-day' + (isToday ? ' today' : '');
+    let dotCls = '';
+    if(dayEvents.some(e => e.type === 'competition' && e.eventDate === iso)) dotCls = 'comp';
+    else if(dayEvents.some(e => e.type === 'registration')) dotCls = 'reg';
+    if(dotCls) cls += ' ' + dotCls;
+    const dot = dayEvents.length ? '<div class="dot"></div>' : '';
+    html += `<div class="${cls}">${day}${dot}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+
+  renderUpcoming();
+}
+
+function renderUpcoming(){
+  const today = todayISO();
+  const sorted = [...events]
+    .filter(e => e.eventDate >= today)
+    .sort((a,b) => a.eventDate.localeCompare(b.eventDate));
+
+  const container = document.getElementById('upcomingList');
+  if(sorted.length === 0){
+    container.innerHTML = '<div class="empty-note">Nothing coming up. Add a competition or registration deadline above.</div>';
+    return;
+  }
+  container.innerHTML = sorted.map(e => {
+    const d = new Date(e.eventDate+'T00:00:00');
+    const label = d.toLocaleDateString(undefined, { day:'numeric', month:'short', year:'numeric' });
+    const typeLabel = e.type === 'registration' ? 'Registration deadline' : e.type === 'competition' ? 'Competition day' : 'Reminder';
+    const badgeCls = e.type === 'registration' ? 'reg' : e.type === 'competition' ? 'comp' : '';
+    return `
+      <div class="evt-row">
+        <div class="evt-badge ${badgeCls}"></div>
+        <div class="evt-info">
+          <div class="evt-name">${escapeHtml(e.name)}</div>
+          <div class="evt-meta">${typeLabel}${e.notes ? ' · ' + escapeHtml(e.notes) : ''}</div>
+        </div>
+        <div class="evt-date">${label}</div>
+        <button class="del-btn" onclick="deleteEvent('${e.id}')">&times;</button>
+      </div>`;
+  }).join('');
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function updateTodayLine(){
+  document.getElementById('todayLine').textContent =
+    new Date().toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+}
+
+function checkDue(){
+  const now = new Date();
+  const hh = pad(now.getHours());
+  const mm = pad(now.getMinutes());
+  const currentTime = hh+':'+mm;
+  const currentDate = todayISO();
+  const nowTime = now.getTime();
+
+  for(const e of events){
+    if(activeAlarmId) break;
+    const key = e.id + '_' + currentDate;
+    if(e.lastFiredKey === key) continue;
+    if(e.snoozeUntil){
+      if(nowTime >= e.snoozeUntil){
+        triggerAlarm(e);
+        e.lastFiredKey = key;
+        e.snoozeUntil = null;
+        saveEvents();
+        break;
+      }
+      continue;
+    }
+    if(e.reminderDate === currentDate && e.reminderTime === currentTime){
+      triggerAlarm(e);
+      e.lastFiredKey = key;
+      saveEvents();
+      break;
+    }
+  }
+}
+
+function triggerAlarm(e){
+  activeAlarmId = e.id;
+  const typeLabel = e.type === 'registration' ? 'Registration deadline coming up' : e.type === 'competition' ? 'Competition day' : 'Reminder';
+  document.getElementById('alarmName').textContent = e.name;
+  document.getElementById('alarmSub').textContent = typeLabel + (e.notes ? ' — ' + e.notes : '');
+  document.getElementById('alarmOverlay').classList.add('show');
+  startAlarmSound();
+}
+
+function startAlarmSound(){
+  const audioEl = document.getElementById('customAudio');
+  if(customSoundData){
+    audioEl.src = customSoundData;
+    audioEl.currentTime = 0;
+    audioEl.play().catch(()=>{});
+  } else {
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      playBeepPattern();
+      alarmInterval = setInterval(playBeepPattern, 1200);
+    }catch(err){}
+  }
+}
+function playBeepPattern(){
+  if(!audioCtx) return;
+  [0, 0.3].forEach(offset => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 740;
+    gain.gain.setValueAtTime(0.0001, audioCtx.currentTime + offset);
+    gain.gain.exponentialRampToValueAtTime(0.35, audioCtx.currentTime + offset + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + offset + 0.25);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(audioCtx.currentTime + offset);
+    osc.stop(audioCtx.currentTime + offset + 0.26);
+  });
+}
+function stopAlarmSound(){
+  const audioEl = document.getElementById('customAudio');
+  audioEl.pause();
+  if(alarmInterval){ clearInterval(alarmInterval); alarmInterval = null; }
+}
+
+function markHandled(){
+  closeAlarm();
+}
+function snoozeAlarm(){
+  const e = events.find(e => e.id === activeAlarmId);
+  if(e) e.snoozeUntil = Date.now() + 60*60*1000;
+  saveEvents();
+  closeAlarm();
+}
+function dismissAlarm(){
+  closeAlarm();
+}
+function closeAlarm(){
+  document.getElementById('alarmOverlay').classList.remove('show');
+  stopAlarmSound();
+  activeAlarmId = null;
+  renderCalendar();
+}
+
+function handleSoundUpload(evt){
+  const file = evt.target.files[0];
+  if(!file) return;
+  if(file.size > 3500000){
+    alert('That file is a bit large — please pick a clip under about 10 seconds.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(){
+    customSoundData = reader.result;
+    try{ localStorage.setItem('dancekeeper_sound', customSoundData); }catch(err){}
+    renderSoundStatus();
+  };
+  reader.readAsDataURL(file);
+}
+function testSound(){
+  const audioEl = document.getElementById('customAudio');
+  if(customSoundData){
+    audioEl.src = customSoundData;
+    audioEl.currentTime = 0;
+    audioEl.play().catch(()=>{});
+    setTimeout(() => audioEl.pause(), 4000);
+  } else {
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      playBeepPattern();
+    }catch(e){}
+  }
+}
+function resetSound(){
+  customSoundData = null;
+  try{ localStorage.removeItem('dancekeeper_sound'); }catch(e){}
+  renderSoundStatus();
+}
+function renderSoundStatus(){
+  const el = document.getElementById('soundStatus');
+  el.querySelector('.txt').textContent = customSoundData ? 'Using your uploaded sound' : 'Using the default alarm tone';
+}
+
+if('Notification' in window && Notification.permission === 'default'){
+  document.body.addEventListener('click', function requestOnce(){
+    Notification.requestPermission();
+    document.body.removeEventListener('click', requestOnce);
+  }, { once:true });
+}
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+loadData();
+updateTodayLine();
+renderCalendar();
+renderSoundStatus();
+setInterval(updateTodayLine, 60000);
+setInterval(checkDue, 1000);
+</script>
+</body>
+</html>
