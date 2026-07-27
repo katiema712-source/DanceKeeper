@@ -253,7 +253,7 @@ function saveComps(){
 }
 
 function switchTab(name){
-  ['calendar','add','settings'].forEach(t => {
+  ['calendar','add','results','settings'].forEach(t => {
     document.getElementById('tab-'+t).style.display = (t===name) ? 'block' : 'none';
   });
   document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab === name));
