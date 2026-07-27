@@ -718,7 +718,10 @@ function closeAlarm(){
 function handleSoundUpload(evt){
   const file = evt.target.files[0];
   if(!file) return;
-  if(file.size > 3500000){ alert('That file is too large (' + Math.round(file.size/1000000*10)/10 + 'MB). WAV files especially can be huge — try an MP3/M4A instead, or trim the clip to under 10 seconds.'); return; }
+  if(file.size > 6000000){
+    alert('That file is too large (' + Math.round(file.size/1000000*10)/10 + 'MB). If this came from a video clip, that\'s likely why — video carries far more data than audio alone, even when trimmed short. Try recording a plain audio clip instead, e.g. with Voice Memos.');
+    return;
+  }
   if(file.type && !file.type.startsWith('audio/')){
     const proceed = confirm('This doesn\'t look like an audio file (' + (file.type || 'unknown type') + '). Try using it anyway?');
     if(!proceed) return;
